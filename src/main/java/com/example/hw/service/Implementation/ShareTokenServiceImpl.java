@@ -33,7 +33,7 @@ public class ShareTokenServiceImpl implements ShareTokenService {
 
     @Override
     public ShareToken shareRecord(ShareRecordRequest request, String email) {
-        logger.debug("Creating share token for record {} by user: {}", request.getRecord_id(), email);
+        logger.debug("Creating share token for record {} by user: {} with expiration date: {}", request.getRecord_id(), email, request.getExpirationDate());
         var userId = userRepository.findIdByEmail(email);
         var record = recordRepository.findById(request.getRecord_id());
         if (!(record.isPresent() && Objects.equals(record.get().getUserId(), userId))) {
@@ -55,7 +55,7 @@ public class ShareTokenServiceImpl implements ShareTokenService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     @Override
-    public Pair<Record, LocalDateTime> useToken(Integer tokenId, String email) {
+    public Pair<Record, LocalDateTime> useToken(Integer tokenId, String email, Integer directoryId) {
         logger.debug("Using share token {} by user: {}", tokenId, email);
         if (!shareTokenRepository.existsById(tokenId)) {
             logger.warn("Failed to use token: token {} does not exist", tokenId);
@@ -85,7 +85,8 @@ public class ShareTokenServiceImpl implements ShareTokenService {
                 record.get().getLogin(),
                 record.get().getPassword(),
                 record.get().getUrl(),
-                userId, 0);
+                userId,
+                directoryId);
         Record savedRecord = recordRepository.save(newRecord);
         logger.info("Successfully used share token {} to create record {}", tokenId, savedRecord.getId());
         return new Pair<Record, LocalDateTime>(savedRecord, token.getCreationDate());

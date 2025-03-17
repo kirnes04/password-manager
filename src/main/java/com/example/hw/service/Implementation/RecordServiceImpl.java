@@ -153,4 +153,18 @@ public class RecordServiceImpl implements com.example.hw.service.RecordService {
         logger.info("Successfully updated record {}", id);
         return updatedRecord;
     }
+
+    public void deleteRecordById(Integer id, String email) {
+        logger.debug("Deleting record {} for user: {}", id, email);
+        if (!recordRepository.existsById(id)) {
+            logger.warn("Failed to delete record: record {} does not exist", id);
+            throw new IllegalArgumentException("Such record does not exist");
+        }
+        if (!Objects.equals(userRepository.findIdByEmail(email), recordRepository.getReferenceById(id).getUserId())) {
+            logger.warn("Failed to delete record: user {} does not own record {}", email, id);
+            throw new IllegalArgumentException("You can't delete someone else's record");
+        }
+        recordRepository.deleteById(id);
+        logger.info("Successfully deleted record {}", id);
+    }
 }

@@ -30,7 +30,7 @@ import { Record, Directory } from '../types';
 
 export const Records: React.FC = () => {
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, logout } = useAuth();
     const [records, setRecords] = useState<Record[]>([]);
     const [directories, setDirectories] = useState<Directory[]>([]);
     const [currentDirectory, setCurrentDirectory] = useState<number>(0);
@@ -44,6 +44,10 @@ export const Records: React.FC = () => {
     });
     const [newDirectoryName, setNewDirectoryName] = useState('');
     const [loading, setLoading] = useState(true);
+    const [shareDialogOpen, setShareDialogOpen] = useState(false);
+    const [shareLink, setShareLink] = useState('');
+    const [useTokenDialogOpen, setUseTokenDialogOpen] = useState(false);
+    const [token, setToken] = useState('');
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -101,7 +105,7 @@ export const Records: React.FC = () => {
 
     const handleDeleteRecord = async (id: number) => {
         try {
-            // Implement delete functionality
+            await recordsAPI.delete(id);
             fetchData();
         } catch (error) {
             console.error('Error deleting record:', error);
@@ -114,7 +118,8 @@ export const Records: React.FC = () => {
                 recordId: record.id,
                 expirationDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
             });
-            // Handle sharing (e.g., show dialog with share link)
+            setShareLink(`${window.location.origin}/shared/${response.data.token}`);
+            setShareDialogOpen(true);
         } catch (error) {
             console.error('Error sharing record:', error);
         }
@@ -127,6 +132,22 @@ export const Records: React.FC = () => {
         } catch (error) {
             console.error('Error moving record:', error);
         }
+    };
+
+    const handleUseToken = async () => {
+        try {
+            const response = await recordsAPI.useToken(token);
+            setRecords([...records, response.data]);
+            setUseTokenDialogOpen(false);
+            setToken('');
+        } catch (error) {
+            console.error('Error using token:', error);
+        }
+    };
+
+    const handleLogout = () => {
+        logout();
+        navigate('/signin');
     };
 
     return (
@@ -149,9 +170,9 @@ export const Records: React.FC = () => {
                             <ListItemIcon>
                                 <FolderOpenIcon />
                             </ListItemIcon>
-                            <ListItemText 
-                                primary="Root" 
-                                sx={{ 
+                            <ListItemText
+                                primary="Root"
+                                sx={{
                                     color: currentDirectory === 0 ? 'primary.main' : 'inherit'
                                 }}
                             />
@@ -166,15 +187,23 @@ export const Records: React.FC = () => {
                                 <ListItemIcon>
                                     <FolderIcon />
                                 </ListItemIcon>
-                                <ListItemText 
+                                <ListItemText
                                     primary={directory.name}
-                                    sx={{ 
+                                    sx={{
                                         color: currentDirectory === directory.id ? 'primary.main' : 'inherit'
                                     }}
                                 />
                             </ListItem>
                         ))}
                     </List>
+                    <Button
+                        variant="outlined"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                        onClick={() => setUseTokenDialogOpen(true)}
+                    >
+                        Use Share Token
+                    </Button>
                 </Paper>
 
                 {/* Records Content */}
@@ -183,13 +212,22 @@ export const Records: React.FC = () => {
                         <Typography variant="h5">
                             {currentDirectory === 0 ? 'All Records' : 'Directory Records'}
                         </Typography>
-                        <Button
-                            variant="contained"
-                            startIcon={<AddIcon />}
-                            onClick={() => setOpenNewRecord(true)}
-                        >
-                            New Record
-                        </Button>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                            <Button
+                                variant="outlined"
+                                color="error"
+                                onClick={handleLogout}
+                            >
+                                Logout
+                            </Button>
+                            <Button
+                                variant="contained"
+                                startIcon={<AddIcon />}
+                                onClick={() => setOpenNewRecord(true)}
+                            >
+                                New Record
+                            </Button>
+                        </Box>
                     </Box>
 
                     <Grid container spacing={2}>
@@ -273,6 +311,49 @@ export const Records: React.FC = () => {
                     <Button onClick={() => setOpenNewDirectory(false)}>Cancel</Button>
                     <Button onClick={handleCreateDirectory} variant="contained">
                         Create
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Share Dialog */}
+            <Dialog open={shareDialogOpen} onClose={() => setShareDialogOpen(false)}>
+                <DialogTitle>Share Record</DialogTitle>
+                <DialogContent>
+                    <Box sx={{ pt: 2 }}>
+                        <Typography variant="body2" color="textSecondary" gutterBottom>
+                            Share this link with others to give them access to this record:
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            value={shareLink}
+                            InputProps={{
+                                readOnly: true,
+                            }}
+                        />
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setShareDialogOpen(false)}>Close</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Use Token Dialog */}
+            <Dialog open={useTokenDialogOpen} onClose={() => setUseTokenDialogOpen(false)}>
+                <DialogTitle>Use Share Token</DialogTitle>
+                <DialogContent>
+                    <Box sx={{ pt: 2 }}>
+                        <TextField
+                            fullWidth
+                            label="Share Token"
+                            value={token}
+                            onChange={(e) => setToken(e.target.value)}
+                        />
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setUseTokenDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={handleUseToken} variant="contained">
+                        Use Token
                     </Button>
                 </DialogActions>
             </Dialog>

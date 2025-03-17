@@ -23,6 +23,7 @@ public class DirectoryController {
                                              Principal principal
     ) {
         try {
+            name = name.replaceAll("^\"|\"$", "");
             var result = directoryService.createDirectory(name, parentId, principal.getName());
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
         } catch (IllegalArgumentException exception) {

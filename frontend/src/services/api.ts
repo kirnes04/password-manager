@@ -51,6 +51,7 @@ export const recordsAPI = {
     create: (data: CreateRecordRequest, directoryId: number = 0) =>
         api.post<Record>(`/records?directoryId=${directoryId}`, data),
     update: (id: number, data: Record) => api.put<Record>(`/records/${id}`, data),
+    delete: (id: number) => api.delete(`/records/${id}`),
     move: (recordId: number, directoryId: number) =>
         api.patch<Record>(`/records/${recordId}?directoryId=${directoryId}`),
     share: (data: ShareRecordRequest) => api.post<{ token: string }>('/records/share', data),

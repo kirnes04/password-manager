@@ -39,9 +39,9 @@ public class ShareTokenController {
     }
 
     @GetMapping(path = "/useToken/{token}")
-    public ResponseEntity<?> useToken(@PathVariable("token") Integer token_id, Principal principal) {
+    public ResponseEntity<?> useToken(@PathVariable("token") Integer token_id, @RequestParam Integer directoryId, Principal principal) {
         try {
-            var res = shareTokenService.useToken(token_id, principal.getName());
+            var res = shareTokenService.useToken(token_id, principal.getName(), directoryId);
             Timer timer = Timer
                     .builder("access_timer")
                     .publishPercentiles(0.5, 0.90, 0.95, 0.99)

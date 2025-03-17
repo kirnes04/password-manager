@@ -17,4 +17,6 @@ public interface RecordService {
     Record putRecordById(Integer id, Record record, String email);
 
     Record patchRecord(Integer recordId, Integer directoryId, String email);
+
+    void deleteRecordById(Integer id, String email);
 }

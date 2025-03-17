@@ -84,4 +84,17 @@ public class RecordController {
                     .body(exception.getMessage());
         }
     }
+
+    @DeleteMapping(path = "/{recordId}")
+    public ResponseEntity<?> deleteRecordById(@PathVariable("recordId") Integer id,
+                                              Principal principal
+    ) {
+        try {
+            recordService.deleteRecordById(id, principal.getName());
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(exception.getMessage());
+        }
+    }
 }

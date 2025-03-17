@@ -10,5 +10,5 @@ import java.time.LocalDateTime;
 public interface ShareTokenService {
     ShareToken shareRecord(ShareRecordRequest request, String email);
 
-    Pair<Record, LocalDateTime> useToken(Integer token, String email);
+    Pair<Record, LocalDateTime> useToken(Integer token, String email, Integer directoryId);
 }
