@@ -1,0 +1,25 @@
+token.signing.key=N4kaTQaPVxM/Wo0VMDWsiqAhucAOUoLvto+cQqQB3dTWuby1Xule/+N+YmxLhHAt
+interval.in.cron = 0 0 3 * * *
+count.of.tokens.to.delete = 1000
+
+## default connection pool
+spring.datasource.hikari.connectionTimeout=20000
+spring.datasource.hikari.maximumPoolSize=5
+
+## PostgreSQL
+spring.datasource.url=jdbc:postgresql://localhost:6789/postgres
+spring.datasource.username=postgres
+spring.datasource.password=admin
+
+management.endpoints.web.exposure.include=*
+management.metrics.distribution.percentiles-histogram.http.server.requests=true
+management.metrics.distribution.percentiles.http.server.requests=0.5, 0.90, 0.95, 0.99
+
+spring.main.allow-bean-definition-overriding=true
+
+# Logging configuration
+logging.level.com.example.hw=DEBUG
+logging.level.com.example.hw.controller=INFO
+logging.level.com.example.hw.service=DEBUG
+logging.level.com.example.hw.config=DEBUG
+logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
