@@ -9,4 +9,5 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface DirectoryMapper {
     List<DirectoryDTO> toDto(List<Directory> dto);
+    DirectoryDTO toDto(Directory directory);
 }

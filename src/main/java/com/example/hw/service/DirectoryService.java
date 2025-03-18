@@ -10,5 +10,11 @@ public interface DirectoryService {
 
     List<DirectoryDTO> getDirectories(String email, Integer parentId);
 
-    Directory createParentDirectory(Integer id);
+    Directory createRootDirectory(Integer id);
+
+    Directory getRootDirectory(String email);
+
+    Directory getParentByDirectoryId(Integer directoryId);
+
+    List<Directory> getChildrenByDirectoryId(Integer directoryId);
 }

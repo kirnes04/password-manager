@@ -77,6 +77,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private void createParentDirectory(Integer id) {
-        directoryService.createParentDirectory(id);
+        directoryService.createRootDirectory(id);
     }
 }

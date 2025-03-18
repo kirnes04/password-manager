@@ -7,6 +7,7 @@ import {
     Button,
     Box,
     Link,
+    Grid,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
@@ -14,28 +15,111 @@ import { useAuth } from '../contexts/AuthContext';
 
 export const SignUp: React.FC = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
-    const [formData, setFormData] = useState({
-        email: '',
-        login: '',
-        password: '',
-    });
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+    const { register } = useAuth();
+    const [email, setEmail] = useState('');
+    const [login, setLogin] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [loginError, setLoginError] = useState<string | null>(null);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
+
+    const validateEmail = (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const validateLogin = (login: string) => {
+        if (login.length < 3) {
+            return 'Login must be at least 3 characters long';
+        }
+        if (!/^[a-zA-Z0-9_]+$/.test(login)) {
+            return 'Login can only contain letters, numbers, and underscores';
+        }
+        return null;
+    };
+
+    const validatePassword = (password: string) => {
+        if (password.length < 8) {
+            return 'Password must be at least 8 characters long';
+        }
+        if (!/[A-Z]/.test(password)) {
+            return 'Password must contain at least one uppercase letter';
+        }
+        if (!/[a-z]/.test(password)) {
+            return 'Password must contain at least one lowercase letter';
+        }
+        if (!/[0-9]/.test(password)) {
+            return 'Password must contain at least one number';
+        }
+        return null;
+    };
+
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newEmail = e.target.value;
+        setEmail(newEmail);
+        if (!validateEmail(newEmail)) {
+            setEmailError('Please enter a valid email address');
+        } else {
+            setEmailError(null);
+        }
+    };
+
+    const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newLogin = e.target.value;
+        setLogin(newLogin);
+        const error = validateLogin(newLogin);
+        setLoginError(error);
+    };
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newPassword = e.target.value;
+        setPassword(newPassword);
+        const error = validatePassword(newPassword);
+        setPasswordError(error);
+    };
+
+    const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newConfirmPassword = e.target.value;
+        setConfirmPassword(newConfirmPassword);
+        if (newConfirmPassword !== password) {
+            setPasswordError('Passwords do not match');
+        } else {
+            setPasswordError(null);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
-        setLoading(true);
+        
+        if (!validateEmail(email)) {
+            setEmailError('Please enter a valid email address');
+            return;
+        }
+
+        const loginValidationError = validateLogin(login);
+        if (loginValidationError) {
+            setLoginError(loginValidationError);
+            return;
+        }
+
+        const passwordValidationError = validatePassword(password);
+        if (passwordValidationError) {
+            setPasswordError(passwordValidationError);
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            setPasswordError('Passwords do not match');
+            return;
+        }
 
         try {
-            const response = await authAPI.signUp(formData);
-            login(response.data.token, { id: 0, email: formData.email, login: formData.login });
+            await register(email, login, password);
             navigate('/records');
-        } catch (err) {
+        } catch (error) {
             setError('Failed to create account. Please try again.');
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -72,10 +156,10 @@ export const SignUp: React.FC = () => {
                             name="email"
                             autoComplete="email"
                             autoFocus
-                            value={formData.email}
-                            onChange={(e) =>
-                                setFormData({ ...formData, email: e.target.value })
-                            }
+                            value={email}
+                            onChange={handleEmailChange}
+                            error={!!emailError}
+                            helperText={emailError}
                         />
                         <TextField
                             margin="normal"
@@ -85,10 +169,10 @@ export const SignUp: React.FC = () => {
                             label="Username"
                             name="login"
                             autoComplete="username"
-                            value={formData.login}
-                            onChange={(e) =>
-                                setFormData({ ...formData, login: e.target.value })
-                            }
+                            value={login}
+                            onChange={handleLoginChange}
+                            error={!!loginError}
+                            helperText={loginError}
                         />
                         <TextField
                             margin="normal"
@@ -99,10 +183,23 @@ export const SignUp: React.FC = () => {
                             type="password"
                             id="password"
                             autoComplete="new-password"
-                            value={formData.password}
-                            onChange={(e) =>
-                                setFormData({ ...formData, password: e.target.value })
-                            }
+                            value={password}
+                            onChange={handlePasswordChange}
+                            error={!!passwordError}
+                            helperText={passwordError}
+                        />
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            name="confirmPassword"
+                            label="Confirm Password"
+                            type="password"
+                            id="confirmPassword"
+                            autoComplete="new-password"
+                            value={confirmPassword}
+                            onChange={handleConfirmPasswordChange}
+                            error={!!passwordError}
                         />
                         {error && (
                             <Typography color="error" sx={{ mt: 1 }}>
@@ -114,9 +211,9 @@ export const SignUp: React.FC = () => {
                             fullWidth
                             variant="contained"
                             sx={{ mt: 3, mb: 2 }}
-                            disabled={loading}
+                            disabled={!!emailError || !!loginError || !!passwordError}
                         >
-                            {loading ? 'Creating account...' : 'Sign Up'}
+                            Sign Up
                         </Button>
                         <Box sx={{ textAlign: 'center' }}>
                             <Link href="/signin" variant="body2">

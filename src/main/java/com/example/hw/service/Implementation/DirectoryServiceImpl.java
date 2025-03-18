@@ -3,6 +3,7 @@ package com.example.hw.service.Implementation;
 import com.example.hw.DirectoryMapper;
 import com.example.hw.dto.DirectoryDTO;
 import com.example.hw.entities.Directory;
+import com.example.hw.entities.User;
 import com.example.hw.repository.DirectoryRepository;
 import com.example.hw.repository.UserRepository;
 import com.example.hw.service.DirectoryService;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class DirectoryServiceImpl implements DirectoryService {
@@ -57,11 +59,42 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
 
     @Override
-    public Directory createParentDirectory(Integer userId) {
+    public Directory createRootDirectory(Integer userId) {
         logger.debug("Creating parent directory root for user: {}", userId);
         var directory = new Directory(0, "root", userId, 0);
         Directory savedDirectory = directoryRepository.save(directory);
         logger.info("Successfully created parent directory root with id {}", savedDirectory.getId());
         return savedDirectory;
+    }
+
+    @Override
+    public Directory getRootDirectory(String email) {
+        logger.debug("Retrieving root directory for user: {}", email);
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Directory directory = directoryRepository.getRootDirectory(user.getId());
+        logger.debug("Found root directory {}", directory.getId());
+        return directory;
+    }
+
+    @Override
+    public Directory getParentByDirectoryId(Integer directoryId) {
+        logger.debug("Retrieving parent directory for directory: {}", directoryId);
+        Optional<Directory> directory = directoryRepository.getParentByDirectoryId(directoryId);
+        if (directory.isPresent()) {
+            logger.debug("Found parent directory {}", directory.get().getId());
+            return directory.get();
+        } else {
+            logger.warn("Failed to retrieve parent directory for directory: {}", directoryId);
+            return null;
+        }
+    }
+
+    @Override
+    public List<Directory> getChildrenByDirectoryId(Integer directoryId) {
+        logger.debug("Retrieving children directories for directory: {}", directoryId);
+        List<Directory> directory = directoryRepository.getChildrenByDirectoryId(directoryId);
+        logger.debug("Found children directories {}", directory);
+        return directory;
     }
 }

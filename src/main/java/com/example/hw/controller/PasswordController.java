@@ -27,7 +27,6 @@ public class PasswordController {
                                            @RequestParam Integer digit,
                                            @RequestParam Integer special
     ) {
-        log.debug("Fetching generate password");
         try {
             return ResponseEntity.ok(passwordService.generatePassword(length, upper, lower, digit, special));
         }

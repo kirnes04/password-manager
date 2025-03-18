@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
+import { authAPI } from '../services/api';
 
 interface AuthContextType {
     user: User | null;
     token: string | null;
     login: (token: string, user: User) => void;
+    register: (email: string, login: string, password: string) => Promise<void>;
     logout: () => void;
     isAuthenticated: boolean;
 }
@@ -38,12 +40,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('user');
     };
 
+    const register = async (email: string, login: string, password: string) => {
+        const response = await authAPI.signUp({ email, login, password });
+        const user: User = {
+            id: 0, // The backend will set this
+            email: email,
+            login: login
+        };
+        setToken(response.data.token);
+        setUser(user);
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(user));
+    };
+
     return (
         <AuthContext.Provider
             value={{
                 user,
                 token,
                 login,
+                register,
                 logout,
                 isAuthenticated: !!token,
             }}

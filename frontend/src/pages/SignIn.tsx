@@ -7,34 +7,53 @@ import {
     Button,
     Box,
     Link,
+    Grid,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { User } from '../types';
 
 export const SignIn: React.FC = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [emailError, setEmailError] = useState<string | null>(null);
+
+    const validateEmail = (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newEmail = e.target.value;
+        setEmail(newEmail);
+        if (!validateEmail(newEmail)) {
+            setEmailError('Please enter a valid email address');
+        } else {
+            setEmailError(null);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
-        setLoading(true);
-
+        if (!validateEmail(email)) {
+            setEmailError('Please enter a valid email address');
+            return;
+        }
         try {
-            const response = await authAPI.signIn(formData);
-            login(response.data.token, { id: 0, email: formData.email, login: '' });
+            const response = await authAPI.signIn({ email, password });
+            const user: User = {
+                id: 0,
+                email: email,
+                login: email.split('@')[0]
+            };
+            login(response.data.token, user);
             navigate('/records');
-        } catch (err) {
+        } catch (error) {
             setError('Invalid email or password');
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -71,10 +90,10 @@ export const SignIn: React.FC = () => {
                             name="email"
                             autoComplete="email"
                             autoFocus
-                            value={formData.email}
-                            onChange={(e) =>
-                                setFormData({ ...formData, email: e.target.value })
-                            }
+                            value={email}
+                            onChange={handleEmailChange}
+                            error={!!emailError}
+                            helperText={emailError}
                         />
                         <TextField
                             margin="normal"
@@ -85,10 +104,8 @@ export const SignIn: React.FC = () => {
                             type="password"
                             id="password"
                             autoComplete="current-password"
-                            value={formData.password}
-                            onChange={(e) =>
-                                setFormData({ ...formData, password: e.target.value })
-                            }
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
                         {error && (
                             <Typography color="error" sx={{ mt: 1 }}>
@@ -100,15 +117,17 @@ export const SignIn: React.FC = () => {
                             fullWidth
                             variant="contained"
                             sx={{ mt: 3, mb: 2 }}
-                            disabled={loading}
+                            disabled={!!emailError}
                         >
-                            {loading ? 'Signing in...' : 'Sign In'}
+                            Sign In
                         </Button>
-                        <Box sx={{ textAlign: 'center' }}>
-                            <Link href="/signup" variant="body2">
-                                {"Don't have an account? Sign Up"}
-                            </Link>
-                        </Box>
+                        <Grid container justifyContent="flex-end">
+                            <Grid item>
+                                <Link href="/signup" variant="body2">
+                                    {"Don't have an account? Sign Up"}
+                                </Link>
+                            </Grid>
+                        </Grid>
                     </Box>
                 </Paper>
             </Box>

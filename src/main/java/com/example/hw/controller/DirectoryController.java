@@ -35,4 +35,19 @@ public class DirectoryController {
     public ResponseEntity<?> getDirectories(@RequestParam(required = false, defaultValue = "0") int parentId, Principal principal) {
         return ResponseEntity.ok(directoryService.getDirectories(principal.getName(), parentId));
     }
+
+    @GetMapping(path = "/root")
+    public ResponseEntity<?> getRootDirectory(Principal principal) {
+        return ResponseEntity.ok(directoryService.getRootDirectory(principal.getName()));
+    }
+
+    @GetMapping(path = "/parents/{id}")
+    public ResponseEntity<?> getParents(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(directoryService.getParentByDirectoryId(id));
+    }
+
+    @GetMapping(path = "/children/{id}")
+    public ResponseEntity<?> getChildren(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(directoryService.getChildrenByDirectoryId(id));
+    }
 }

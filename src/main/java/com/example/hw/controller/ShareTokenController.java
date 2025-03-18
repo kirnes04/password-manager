@@ -30,7 +30,7 @@ public class ShareTokenController {
     @PostMapping(path = "/share")
     public ResponseEntity<?> shareRecord(@RequestBody ShareRecordRequest request, Principal principal) {
         try {
-            var res = shareTokenService.shareRecord(request,  principal.getName());
+            var res = shareTokenService.shareRecord(request, principal.getName());
             return ResponseEntity.status(HttpStatus.CREATED).body(res);
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
