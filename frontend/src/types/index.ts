@@ -46,4 +46,9 @@ export interface CreateRecordRequest {
 export interface ShareRecordRequest {
     recordId: number;
     expirationDate: string;
+}
+
+export interface ShareTokenResponse {
+    token: string;
+    expirationDate: string;
 } 

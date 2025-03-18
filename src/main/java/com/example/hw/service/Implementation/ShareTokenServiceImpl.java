@@ -1,6 +1,7 @@
 package com.example.hw.service.Implementation;
 
 import com.example.hw.dao.request.ShareRecordRequest;
+import com.example.hw.dao.response.ShareTokenResponse;
 import com.example.hw.entities.Record;
 import com.example.hw.entities.ShareToken;
 import com.example.hw.repository.RecordRepository;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Objects;
 
 @Service
@@ -32,7 +34,7 @@ public class ShareTokenServiceImpl implements ShareTokenService {
     }
 
     @Override
-    public ShareToken shareRecord(ShareRecordRequest request, String email) {
+    public ShareTokenResponse shareRecord(ShareRecordRequest request, String email) {
         logger.debug("Creating share token for record {} by user: {} with expiration date: {}", request.getRecord_id(), email, request.getExpirationDate());
         var userId = userRepository.findIdByEmail(email);
         var record = recordRepository.findById(request.getRecord_id());
@@ -48,15 +50,21 @@ public class ShareTokenServiceImpl implements ShareTokenService {
                 record.get().getId());
         ShareToken savedToken = shareTokenRepository.save(token);
         logger.info("Successfully created share token {} for record {}", savedToken.getId(), request.getRecord_id());
-        return savedToken;
+        Base64.Encoder encoder = Base64.getEncoder();
+        String encodedToken = encoder.encodeToString((savedToken.getId().toString() + "0000").getBytes());
+        logger.debug("Encoded token: {}", encodedToken);
+        return new ShareTokenResponse(encodedToken, savedToken.getExpirationDate());
     }
 
     // token is token_id
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     @Override
-    public Pair<Record, LocalDateTime> useToken(Integer tokenId, String email, Integer directoryId) {
-        logger.debug("Using share token {} by user: {}", tokenId, email);
+    public Pair<Record, LocalDateTime> useToken(String encodedToken, String email, Integer directoryId) {
+        logger.debug("Using share token {} by user: {}", encodedToken, email);
+        Base64.Decoder decoder = Base64.getDecoder();
+        Integer tokenId = Integer.parseInt(new String(decoder.decode(encodedToken))) / 10000;
+        logger.debug("Decoded token: {}", tokenId);
         if (!shareTokenRepository.existsById(tokenId)) {
             logger.warn("Failed to use token: token {} does not exist", tokenId);
             throw new IllegalArgumentException("Such token does not exist");
@@ -89,6 +97,6 @@ public class ShareTokenServiceImpl implements ShareTokenService {
                 directoryId);
         Record savedRecord = recordRepository.save(newRecord);
         logger.info("Successfully used share token {} to create record {}", tokenId, savedRecord.getId());
-        return new Pair<Record, LocalDateTime>(savedRecord, token.getCreationDate());
+        return new Pair<>(savedRecord, token.getCreationDate());
     }
 }

@@ -28,6 +28,7 @@ import {
     Refresh as RefreshIcon,
     ExpandLess,
     ExpandMore,
+    Share as ShareIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -53,7 +54,7 @@ export const Records: React.FC = () => {
     const [newDirectoryName, setNewDirectoryName] = useState('');
     const [loading, setLoading] = useState(true);
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
-    const [shareData, setShareData] = useState<{ id: number; expirationDate: string } | null>(null);
+    const [shareData, setShareData] = useState<{ token: string; expirationDate: string } | null>(null);
     const [useTokenDialogOpen, setUseTokenDialogOpen] = useState(false);
     const [token, setToken] = useState('');
     const [selectedRecord, setSelectedRecord] = useState<Record | null>(null);
@@ -184,7 +185,7 @@ export const Records: React.FC = () => {
             const expirationDate = new Date(Date.now() + (minutes + 180) * 60 * 1000).toISOString();
             const response = await recordsAPI.share(selectedRecord.id, expirationDate);
             setShareData({
-                id: response.data.id,
+                token: response.data.token,
                 expirationDate: new Date(response.data.expirationDate).toLocaleString()
             });
             setExpirationDateDialogOpen(false);
@@ -372,6 +373,13 @@ export const Records: React.FC = () => {
                             </Button>
                             <Button
                                 variant="outlined"
+                                startIcon={<ShareIcon />}
+                                onClick={() => setUseTokenDialogOpen(true)}
+                            >
+                                Use Share Token
+                            </Button>
+                            <Button
+                                variant="outlined"
                                 color="error"
                                 onClick={handleLogout}
                             >
@@ -532,7 +540,7 @@ export const Records: React.FC = () => {
                         </Typography>
                         <TextField
                             label="Share Record Token"
-                            value={shareData?.id || ''}
+                            value={shareData?.token || ''}
                             InputProps={{
                                 readOnly: true,
                             }}

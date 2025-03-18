@@ -5,6 +5,7 @@ import {
     Directory,
     Record,
     ShareRecordRequest,
+    ShareTokenResponse,
     SignInRequest,
     SignUpRequest
 } from '../types';
@@ -118,9 +119,9 @@ export const recordsAPI = {
             }),
 
     share: (recordId: number, expirationDate: string) => 
-        api.post<{ id: number; isUsed: boolean; creationDate: string; expirationDate: string; recordId: number }>(
+        api.post<ShareTokenResponse>(
             '/records/share', 
-            { record_id: recordId, expirationDate }
+            { record_id: recordId, expirationDate: new Date(expirationDate) }
         ).catch((error: AxiosError) => {
             if (error.response?.status === 400) {
                 throw new Error(error.response.data as string);

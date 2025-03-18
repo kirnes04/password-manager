@@ -31,7 +31,7 @@ public class ShareTokenController {
     public ResponseEntity<?> shareRecord(@RequestBody ShareRecordRequest request, Principal principal) {
         try {
             var res = shareTokenService.shareRecord(request, principal.getName());
-            return ResponseEntity.status(HttpStatus.CREATED).body(res);
+            return ResponseEntity.ok().body(res);
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(exception.getMessage());
@@ -39,9 +39,9 @@ public class ShareTokenController {
     }
 
     @GetMapping(path = "/useToken/{token}")
-    public ResponseEntity<?> useToken(@PathVariable("token") Integer token_id, @RequestParam Integer directoryId, Principal principal) {
+    public ResponseEntity<?> useToken(@PathVariable("token") String encodedToken, @RequestParam Integer directoryId, Principal principal) {
         try {
-            var res = shareTokenService.useToken(token_id, principal.getName(), directoryId);
+            var res = shareTokenService.useToken(encodedToken, principal.getName(), directoryId);
             Timer timer = Timer
                     .builder("access_timer")
                     .publishPercentiles(0.5, 0.90, 0.95, 0.99)
