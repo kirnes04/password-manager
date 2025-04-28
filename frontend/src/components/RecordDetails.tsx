@@ -13,8 +13,10 @@ import {
 import {
     Visibility as VisibilityIcon,
     VisibilityOff as VisibilityOffIcon,
+    Security as SecurityIcon,
 } from '@mui/icons-material';
 import { Record } from '../types';
+import { PasswordCheckForm } from './PasswordCheckForm';
 
 interface RecordDetailsProps {
     record: Record;
@@ -32,6 +34,7 @@ export const RecordDetails: React.FC<RecordDetailsProps> = ({
     const [showPassword, setShowPassword] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editedRecord, setEditedRecord] = useState(record);
+    const [passwordCheckOpen, setPasswordCheckOpen] = useState(false);
 
     const handleEdit = () => {
         setIsEditing(true);
@@ -109,54 +112,70 @@ export const RecordDetails: React.FC<RecordDetailsProps> = ({
     }
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-            <DialogTitle>Record Details</DialogTitle>
-            <DialogContent>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-                    <Box>
-                        <Typography variant="subtitle2" color="textSecondary">
-                            Name
-                        </Typography>
-                        <Typography variant="body1">{record.name}</Typography>
-                    </Box>
-                    {record.login && (
+        <>
+            <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+                <DialogTitle>Record Details</DialogTitle>
+                <DialogContent>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
                         <Box>
                             <Typography variant="subtitle2" color="textSecondary">
-                                Login
+                                Name
                             </Typography>
-                            <Typography variant="body1">{record.login}</Typography>
+                            <Typography variant="body1">{record.name}</Typography>
                         </Box>
-                    )}
-                    {record.password && (
-                        <Box>
-                            <Typography variant="subtitle2" color="textSecondary">
-                                Password
-                            </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography variant="body1">
-                                    {showPassword ? record.password : '••••••••'}
+                        {record.login && (
+                            <Box>
+                                <Typography variant="subtitle2" color="textSecondary">
+                                    Login
                                 </Typography>
-                                <IconButton onClick={() => setShowPassword(!showPassword)} size="small">
-                                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                                </IconButton>
+                                <Typography variant="body1">{record.login}</Typography>
                             </Box>
-                        </Box>
-                    )}
-                    {record.url && (
-                        <Box>
-                            <Typography variant="subtitle2" color="textSecondary">
-                                URL
-                            </Typography>
-                            <Typography variant="body1">{record.url}</Typography>
-                        </Box>
-                    )}
-                </Box>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={handleEdit} variant="contained">
-                    Edit
-                </Button>
-            </DialogActions>
-        </Dialog>
+                        )}
+                        {record.password && (
+                            <Box>
+                                <Typography variant="subtitle2" color="textSecondary">
+                                    Password
+                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Typography variant="body1">
+                                        {showPassword ? record.password : '••••••••'}
+                                    </Typography>
+                                    <IconButton onClick={() => setShowPassword(!showPassword)} size="small">
+                                        {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                    </IconButton>
+                                    <IconButton
+                                        onClick={() => setPasswordCheckOpen(true)}
+                                        size="small"
+                                        color="primary"
+                                        title="Check password security"
+                                    >
+                                        <SecurityIcon />
+                                    </IconButton>
+                                </Box>
+                            </Box>
+                        )}
+                        {record.url && (
+                            <Box>
+                                <Typography variant="subtitle2" color="textSecondary">
+                                    URL
+                                </Typography>
+                                <Typography variant="body1">{record.url}</Typography>
+                            </Box>
+                        )}
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleEdit} variant="contained">
+                        Edit
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <PasswordCheckForm
+                open={passwordCheckOpen}
+                onClose={() => setPasswordCheckOpen(false)}
+                initialPassword={record.password}
+            />
+        </>
     );
 }; 
