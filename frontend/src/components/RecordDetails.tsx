@@ -113,36 +113,36 @@ export const RecordDetails: React.FC<RecordDetailsProps> = ({
 
     return (
         <>
-            <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-                <DialogTitle>Record Details</DialogTitle>
-                <DialogContent>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+            <DialogTitle>Record Details</DialogTitle>
+            <DialogContent>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+                    <Box>
+                        <Typography variant="subtitle2" color="textSecondary">
+                            Name
+                        </Typography>
+                        <Typography variant="body1">{record.name}</Typography>
+                    </Box>
+                    {record.login && (
                         <Box>
                             <Typography variant="subtitle2" color="textSecondary">
-                                Name
+                                Login
                             </Typography>
-                            <Typography variant="body1">{record.name}</Typography>
+                            <Typography variant="body1">{record.login}</Typography>
                         </Box>
-                        {record.login && (
-                            <Box>
-                                <Typography variant="subtitle2" color="textSecondary">
-                                    Login
+                    )}
+                    {record.password && (
+                        <Box>
+                            <Typography variant="subtitle2" color="textSecondary">
+                                Password
+                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography variant="body1">
+                                    {showPassword ? record.password : '••••••••'}
                                 </Typography>
-                                <Typography variant="body1">{record.login}</Typography>
-                            </Box>
-                        )}
-                        {record.password && (
-                            <Box>
-                                <Typography variant="subtitle2" color="textSecondary">
-                                    Password
-                                </Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Typography variant="body1">
-                                        {showPassword ? record.password : '••••••••'}
-                                    </Typography>
-                                    <IconButton onClick={() => setShowPassword(!showPassword)} size="small">
-                                        {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                                    </IconButton>
+                                <IconButton onClick={() => setShowPassword(!showPassword)} size="small">
+                                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                </IconButton>
                                     <IconButton
                                         onClick={() => setPasswordCheckOpen(true)}
                                         size="small"
@@ -151,25 +151,25 @@ export const RecordDetails: React.FC<RecordDetailsProps> = ({
                                     >
                                         <SecurityIcon />
                                     </IconButton>
-                                </Box>
                             </Box>
-                        )}
-                        {record.url && (
-                            <Box>
-                                <Typography variant="subtitle2" color="textSecondary">
-                                    URL
-                                </Typography>
-                                <Typography variant="body1">{record.url}</Typography>
-                            </Box>
-                        )}
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleEdit} variant="contained">
-                        Edit
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                        </Box>
+                    )}
+                    {record.url && (
+                        <Box>
+                            <Typography variant="subtitle2" color="textSecondary">
+                                URL
+                            </Typography>
+                            <Typography variant="body1">{record.url}</Typography>
+                        </Box>
+                    )}
+                </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleEdit} variant="contained">
+                    Edit
+                </Button>
+            </DialogActions>
+        </Dialog>
 
             <PasswordCheckForm
                 open={passwordCheckOpen}
