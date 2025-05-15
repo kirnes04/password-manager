@@ -9,11 +9,13 @@ import {
     IconButton,
     Box,
     Typography,
+    Tooltip,
 } from '@mui/material';
 import {
     Visibility as VisibilityIcon,
     VisibilityOff as VisibilityOffIcon,
     Security as SecurityIcon,
+    ContentCopy as ContentCopyIcon,
 } from '@mui/icons-material';
 import { Record } from '../types';
 import { PasswordCheckForm } from './PasswordCheckForm';
@@ -48,6 +50,10 @@ export const RecordDetails: React.FC<RecordDetailsProps> = ({
     const handleCancel = () => {
         setEditedRecord(record);
         setIsEditing(false);
+    };
+
+    const handleCopyPassword = () => {
+        navigator.clipboard.writeText(record.password);
     };
 
     if (isEditing) {
@@ -113,63 +119,75 @@ export const RecordDetails: React.FC<RecordDetailsProps> = ({
 
     return (
         <>
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-            <DialogTitle>Record Details</DialogTitle>
-            <DialogContent>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-                    <Box>
-                        <Typography variant="subtitle2" color="textSecondary">
-                            Name
-                        </Typography>
-                        <Typography variant="body1">{record.name}</Typography>
-                    </Box>
-                    {record.login && (
+            <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+                <DialogTitle>Record Details</DialogTitle>
+                <DialogContent>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
                         <Box>
                             <Typography variant="subtitle2" color="textSecondary">
-                                Login
+                                Name
                             </Typography>
-                            <Typography variant="body1">{record.login}</Typography>
+                            <Typography variant="body1">{record.name}</Typography>
                         </Box>
-                    )}
-                    {record.password && (
-                        <Box>
-                            <Typography variant="subtitle2" color="textSecondary">
-                                Password
-                            </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography variant="body1">
-                                    {showPassword ? record.password : '••••••••'}
+                        {record.login && (
+                            <Box>
+                                <Typography variant="subtitle2" color="textSecondary">
+                                    Login
                                 </Typography>
-                                <IconButton onClick={() => setShowPassword(!showPassword)} size="small">
-                                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                                </IconButton>
-                                    <IconButton
-                                        onClick={() => setPasswordCheckOpen(true)}
-                                        size="small"
-                                        color="primary"
-                                        title="Check password security"
-                                    >
-                                        <SecurityIcon />
-                                    </IconButton>
+                                <Typography variant="body1">{record.login}</Typography>
                             </Box>
-                        </Box>
-                    )}
-                    {record.url && (
-                        <Box>
-                            <Typography variant="subtitle2" color="textSecondary">
-                                URL
-                            </Typography>
-                            <Typography variant="body1">{record.url}</Typography>
-                        </Box>
-                    )}
-                </Box>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={handleEdit} variant="contained">
-                    Edit
-                </Button>
-            </DialogActions>
-        </Dialog>
+                        )}
+                        {record.password && (
+                            <Box>
+                                <Typography variant="subtitle2" color="textSecondary">
+                                    Password
+                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Typography variant="body1">
+                                        {showPassword ? record.password : '••••••••'}
+                                    </Typography>
+                                    <Tooltip title="Toggle password visibility">
+                                        <IconButton onClick={() => setShowPassword(!showPassword)} size="small">
+                                            {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Copy password">
+                                        <IconButton
+                                            onClick={handleCopyPassword}
+                                            size="small"
+                                            color="primary"
+                                        >
+                                            <ContentCopyIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Check password security">
+                                        <IconButton
+                                            onClick={() => setPasswordCheckOpen(true)}
+                                            size="small"
+                                            color="primary"
+                                        >
+                                            <SecurityIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Box>
+                            </Box>
+                        )}
+                        {record.url && (
+                            <Box>
+                                <Typography variant="subtitle2" color="textSecondary">
+                                    URL
+                                </Typography>
+                                <Typography variant="body1">{record.url}</Typography>
+                            </Box>
+                        )}
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleEdit} variant="contained">
+                        Edit
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <PasswordCheckForm
                 open={passwordCheckOpen}

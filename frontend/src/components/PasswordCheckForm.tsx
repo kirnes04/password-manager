@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { checkPassword, PasswordCheckResult, PasswordCheckError } from '../services/hibpService';
+import { checkPassword, PasswordCheckResult } from '../services/hibpService';
 import {
   Button,
   TextField,
@@ -12,7 +12,6 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
-  Alert,
 } from '@mui/material';
 import {
   Visibility as VisibilityIcon,
@@ -40,30 +39,18 @@ export const PasswordCheckForm: React.FC<PasswordCheckFormProps> = ({
     try {
       setLoading(true);
       setError(null);
-      setResult(null);
       const result = await checkPassword(password);
       setResult(result);
     } catch (err) {
-      if (err instanceof PasswordCheckError) {
-        setError(err.message);
-      } else {
-        setError('An unexpected error occurred. Please try again.');
-        console.error(err);
-      }
+      setError('Failed to check password. Please try again.');
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    setPassword('');
-    setResult(null);
-    setError(null);
-    onClose();
-  };
-
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Check Password Security</DialogTitle>
       <DialogContent>
         <Box sx={{ mt: 2 }}>
@@ -74,7 +61,6 @@ export const PasswordCheckForm: React.FC<PasswordCheckFormProps> = ({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             margin="normal"
-            error={!!error}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -96,29 +82,29 @@ export const PasswordCheckForm: React.FC<PasswordCheckFormProps> = ({
           )}
 
           {error && (
-            <Alert severity="error" sx={{ mt: 2 }}>
+            <Typography color="error" sx={{ mt: 2 }}>
               {error}
-            </Alert>
+            </Typography>
           )}
 
           {result && (
             <Box sx={{ mt: 2 }}>
-              <Alert severity={result.isCompromised ? 'error' : 'success'}>
+              <Typography variant="h6" color={result.isCompromised ? 'error' : 'success'}>
                 {result.isCompromised
                   ? 'This password has been compromised!'
                   : 'This password has not been found in any known data breaches.'}
-                {result.isCompromised && result.count && (
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    This password has been found {result.count.toLocaleString()} times in data breaches.
-                  </Typography>
-                )}
-              </Alert>
+              </Typography>
+              {result.isCompromised && result.count && (
+                <Typography variant="body2" color="text.secondary">
+                  This password has been found {result.count} times in data breaches.
+                </Typography>
+              )}
             </Box>
           )}
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
+        <Button onClick={onClose}>Close</Button>
         <Button
           onClick={handleCheck}
           variant="contained"
